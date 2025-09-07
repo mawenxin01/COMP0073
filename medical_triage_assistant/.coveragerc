@@ -1,0 +1,31 @@
+# Coverage configuration for Medical Triage Assistant
+[run]
+source = .
+
+# Include only application code, exclude research scripts and configs
+omit = 
+    */tests/*
+    */venv/*
+    */__pycache__/*
+    */config/*
+    */methods/chatgpt/*
+    */methods/redflag/*
+    */methods/tfidf_ml/*
+    */keyword_extraction/*
+    install_hybrid_retrieval_deps.py
+    data_processing/02_add_time_labels.py
+    main.py
+
+[report]
+# Fail if coverage below this threshold for application code
+fail_under = 80
+
+# Show missing lines
+show_missing = True
+
+# Skip covered files in report
+skip_covered = False
+
+[html]
+directory = tests/coverage_html
+title = Medical Triage Assistant Coverage Report

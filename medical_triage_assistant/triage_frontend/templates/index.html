@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI-Powered Triage Assistant</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #2c5aa0;
+        --secondary-color: #4a90e2;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --light-bg: #f8f9fa;
+        --dark-bg: #343a40;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .main-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        margin: 20px auto;
+        max-width: 1200px;
+      }
+
+      .header {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        padding: 30px;
+        border-radius: 20px 20px 0 0;
+        text-align: center;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+      }
+
+      .header p {
+        margin: 10px 0 0 0;
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 40px;
+      }
+
+      .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+      }
+
+      .form-section h3 {
+        color: var(--primary-color);
+        margin-bottom: 25px;
+        font-weight: 600;
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+      }
+
+      .form-control,
+      .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        border: none;
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(44, 90, 160, 0.3);
+      }
+
+      .result-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        display: none;
+      }
+
+      .triage-level {
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+      }
+
+      .triage-level-1 {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+      }
+
+      .triage-level-2 {
+        background: linear-gradient(135deg, #fd7e14, #e55a00);
+        color: white;
+      }
+
+      .triage-level-3 {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: #212529;
+      }
+
+      .triage-level-4 {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+        color: white;
+      }
+
+      .triage-level h2 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .triage-level p {
+        font-size: 1.2rem;
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+      }
+
+      .similar-cases {
+        background: var(--light-bg);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+      }
+
+      .case-item {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid var(--secondary-color);
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 40px;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--secondary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .example-btn {
+        background: var(--light-bg);
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 8px 15px;
+        margin: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-block;
+      }
+
+      .example-btn:hover {
+        background: var(--secondary-color);
+        color: white;
+        border-color: var(--secondary-color);
+      }
+
+      .example-btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .clear-btn {
+        background: var(--warning-color);
+        border: 2px solid var(--warning-color);
+        border-radius: 8px;
+        padding: 8px 15px;
+        margin: 5px;
+        margin-left: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #212529;
+        font-weight: 600;
+        display: inline-block;
+      }
+
+      .clear-btn:hover {
+        background: #e0a800;
+        border-color: #e0a800;
+      }
+
+      .model-selector {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border: 2px solid #dee2e6;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+      }
+
+      .model-selector select {
+        border: 2px solid var(--secondary-color);
+        border-radius: 10px;
+        background: white;
+      }
+
+      .model-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .status-online {
+        background: var(--success-color);
+      }
+
+      .status-offline {
+        background: var(--danger-color);
+      }
+
+      .footer {
+        background: var(--dark-bg);
+        color: white;
+        padding: 20px;
+        border-radius: 0 0 20px 20px;
+        text-align: center;
+      }
+
+      /* Auto-resize textarea styles */
+      .auto-resize {
+        transition: height 0.2s ease;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 768px) {
+        .main-container {
+          margin: 10px;
+          border-radius: 15px;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .content {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+          <h1>
+            <i class="fas fa-stethoscope"></i> AI-Powered Triage Assistant
+          </h1>
+          <div class="mt-3">
+            <span class="status-indicator" id="statusIndicator"></span>
+            <span id="statusText">Checking system status...</span>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+          <!-- Input Form -->
+          <div class="form-section">
+            <h3>
+              <i class="fas fa-user-injured"></i> Patient Information Input
+            </h3>
+
+            <!-- Model Selection -->
+            <div class="model-selector">
+              <div class="row">
+                <div class="col-12">
+                  <label class="form-label"
+                    ><i class="fas fa-brain"></i>
+                    <strong>Select AI Model</strong></label
+                  >
+                  <select class="form-select" id="modelSelect">
+                    <option value="tfidf_rf" selected>🔍 TFIDF-ML</option>
+                    <option value="llama_rag">🦙 Llama-3.3-70B + RAG</option>
+                  </select>
+                  <small class="text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    Choose between advanced AI model with retrieval-augmented
+                    generation or traditional machine learning approach
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chief Complaint - Full Width -->
+            <div class="row">
+              <div class="col-12">
+                <div class="mb-4">
+                  <label class="form-label">Chief Complaint *</label>
+                  <textarea
+                    class="form-control auto-resize"
+                    id="chiefComplaint"
+                    rows="2"
+                    placeholder="Please describe the patient's main symptoms in detail, e.g., chest pain, difficulty breathing, fever, etc."
+                    style="
+                      font-size: 1.1rem;
+                      resize: none;
+                      overflow: hidden;
+                      min-height: 60px;
+                    "
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Patient Information and Vital Signs -->
+            <div class="row">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">Age *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="age"
+                    min="0"
+                    max="120"
+                    placeholder="Enter age"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Gender</label>
+                  <select class="form-select" id="gender">
+                    <option value="">Please select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Arrival Method</label>
+                  <select class="form-select" id="arrivalTransport">
+                    <option value="">Please select</option>
+                    <option value="AMBULANCE">Ambulance</option>
+                    <option value="WALK IN">Walk-in</option>
+                    <option value="OTHER">Other</option>
+                    <option value="UNKNOWN">Unknown</option>
+                    <option value="HELICOPTER">Helicopter</option>
+                  </select>
+                  <small class="text-muted"
+                    >How did the patient arrive at the hospital</small
+                  >
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Arrival Time</label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="arrivalTime"
+                    placeholder="HH:MM"
+                  />
+                  <small class="text-muted"
+                    >Time when the patient arrived (HH:MM format)</small
+                  >
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">Heart Rate (bpm) *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="heartRate"
+                    min="40"
+                    max="200"
+                    placeholder="60-100"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Systolic BP (mmHg) *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="sbp"
+                    min="70"
+                    max="250"
+                    placeholder="90-140"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Diastolic BP (mmHg) *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="dbp"
+                    min="40"
+                    max="150"
+                    placeholder="60-90"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label class="form-label">Temperature (°F) *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="temperature"
+                    min="90"
+                    max="110"
+                    step="0.1"
+                    placeholder="96.0-104.0"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Oxygen Saturation (%) *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="o2sat"
+                    min="70"
+                    max="100"
+                    placeholder="95-100"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Pain Score (0-10) *</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="pain"
+                    min="0"
+                    max="10"
+                    placeholder="0-10"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Example Cases -->
+            <div class="mt-4">
+              <label class="form-label">Quick Examples:</label>
+              <div class="d-flex flex-wrap align-items-center">
+                <div id="exampleButtons"></div>
+                <button
+                  type="button"
+                  class="clear-btn"
+                  onclick="clearAllInputs()"
+                >
+                  <i class="fas fa-eraser"></i> Clear All
+                </button>
+              </div>
+            </div>
+
+            <div class="text-center mt-4">
+              <button
+                type="button"
+                class="btn btn-primary btn-lg"
+                onclick="predictTriage()"
+              >
+                <i class="fas fa-brain"></i> Start Triage Prediction
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div class="loading" id="loading">
+            <div class="spinner mb-3"></div>
+            <p id="loadingText">
+              AI is analyzing patient information, please wait...
+            </p>
+          </div>
+
+          <!-- Results -->
+          <div class="result-section" id="resultSection">
+            <h3><i class="fas fa-chart-line"></i> Triage Results</h3>
+
+            <div id="triageResult"></div>
+
+            <!-- Analysis Details - Full Width -->
+            <div class="row mt-4" id="analysisDetailsSection">
+              <div class="col-12">
+                <h5><i class="fas fa-info-circle"></i> Analysis Details</h5>
+                <div id="analysisDetails"></div>
+              </div>
+            </div>
+
+            <!-- Similar Cases - Full Width -->
+            <div class="row mt-4" id="similarCasesSection">
+              <div class="col-12">
+                <h5><i class="fas fa-history"></i> Similar Cases</h5>
+                <small
+                  class="text-muted mb-2"
+                  style="display: block"
+                  id="similarCasesNote"
+                >
+                  <i class="fas fa-info-circle"></i>
+                  <span id="modelNote"
+                    >Select a model to see how similarity is determined</span
+                  >
+                </small>
+                <div id="similarCases"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <p>&copy; 2024 AI-Powered Triage Assistant</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Global variables
+      let examples = [];
+      let activeExampleIndex = -1;
+
+      // Initialize after page load
+      document.addEventListener("DOMContentLoaded", function () {
+        checkSystemStatus();
+        loadExamples();
+        initAutoResizeTextarea();
+        setCurrentTime();
+      });
+
+      // Set current time in arrival time field
+      function setCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const currentTime = `${hours}:${minutes}`;
+        document.getElementById("arrivalTime").value = currentTime;
+      }
+
+      // Initialize auto-resize textarea
+      function initAutoResizeTextarea() {
+        const textarea = document.getElementById("chiefComplaint");
+
+        // Auto height adjustment function
+        function autoResize() {
+          // Reset height
+          textarea.style.height = "auto";
+          // Set new height, but not less than minimum height
+          const newHeight = Math.max(textarea.scrollHeight, 60);
+          textarea.style.height = newHeight + "px";
+        }
+
+        // Listen for input events
+        textarea.addEventListener("input", autoResize);
+        textarea.addEventListener("paste", function () {
+          // Delay adjustment after paste to ensure content is pasted
+          setTimeout(autoResize, 10);
+        });
+
+        // Initial adjustment
+        autoResize();
+      }
+
+      // Check system status
+      async function checkSystemStatus() {
+        try {
+          const response = await fetch("/api/health");
+          const data = await response.json();
+
+          const statusIndicator = document.getElementById("statusIndicator");
+          const statusText = document.getElementById("statusText");
+
+          if (data.status === "healthy") {
+            statusIndicator.className = "status-indicator status-online";
+            statusText.textContent = "System Online";
+          } else {
+            statusIndicator.className = "status-indicator status-offline";
+            statusText.textContent = "System Offline";
+          }
+        } catch (error) {
+          const statusIndicator = document.getElementById("statusIndicator");
+          const statusText = document.getElementById("statusText");
+          statusIndicator.className = "status-indicator status-offline";
+          statusText.textContent = "Connection Failed";
+        }
+      }
+
+      // Load example cases
+      async function loadExamples() {
+        try {
+          const response = await fetch("/api/examples");
+          const data = await response.json();
+          examples = data.examples;
+
+          const container = document.getElementById("exampleButtons");
+          examples.forEach((example, index) => {
+            const button = document.createElement("button");
+            button.className = "example-btn";
+            button.textContent = `Example ${index + 1}`;
+            button.id = `example-btn-${index}`;
+            button.onclick = () => fillExample(example, index);
+            container.appendChild(button);
+          });
+        } catch (error) {
+          console.error("Failed to load examples:", error);
+        }
+      }
+
+      // Fill example data
+      function fillExample(example, index) {
+        // Update button status
+        updateActiveExample(index);
+
+        document.getElementById("chiefComplaint").value =
+          example.chief_complaint;
+        document.getElementById("age").value = example.age;
+        document.getElementById("gender").value = example.gender;
+        document.getElementById("arrivalTransport").value =
+          example.arrival_transport || "";
+
+        // Set example arrival time (use only hour:minute format)
+        if (example.arrival_time) {
+          document.getElementById("arrivalTime").value = example.arrival_time;
+        } else {
+          // Default to 2 hours ago
+          const now = new Date();
+          now.setHours(now.getHours() - 2);
+          const timeString = now.toTimeString().slice(0, 5); // HH:MM format
+          document.getElementById("arrivalTime").value = timeString;
+        }
+
+        document.getElementById("heartRate").value = example.heart_rate;
+        document.getElementById("sbp").value = example.sbp;
+        document.getElementById("dbp").value = example.dbp;
+        document.getElementById("temperature").value = example.temperature;
+        document.getElementById("o2sat").value = example.o2sat;
+        document.getElementById("pain").value = example.pain;
+
+        // Adjust textarea height after filling
+        const textarea = document.getElementById("chiefComplaint");
+        setTimeout(() => {
+          textarea.style.height = "auto";
+          const newHeight = Math.max(textarea.scrollHeight, 60);
+          textarea.style.height = newHeight + "px";
+        }, 10);
+      }
+
+      // Update active example button
+      function updateActiveExample(index) {
+        // Remove active state from all buttons
+        document.querySelectorAll(".example-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        // Set current button as active
+        if (index >= 0) {
+          const activeBtn = document.getElementById(`example-btn-${index}`);
+          if (activeBtn) {
+            activeBtn.classList.add("active");
+          }
+          activeExampleIndex = index;
+        } else {
+          activeExampleIndex = -1;
+        }
+      }
+
+      // Clear all inputs
+      function clearAllInputs() {
+        // Clear all form fields
+        document.getElementById("chiefComplaint").value = "";
+        document.getElementById("age").value = "";
+        document.getElementById("gender").value = "";
+        document.getElementById("arrivalTransport").value = "";
+        setCurrentTime(); // Reset to current time
+        document.getElementById("heartRate").value = "";
+        document.getElementById("sbp").value = "";
+        document.getElementById("dbp").value = "";
+        document.getElementById("temperature").value = "";
+        document.getElementById("o2sat").value = "";
+        document.getElementById("pain").value = "";
+
+        // Reset model selection to default
+        document.getElementById("modelSelect").value = "tfidf_rf";
+
+        // Clear active state of example buttons
+        updateActiveExample(-1);
+
+        // Reset textarea height
+        const textarea = document.getElementById("chiefComplaint");
+        textarea.style.height = "auto";
+        const newHeight = Math.max(60, 60);
+        textarea.style.height = newHeight + "px";
+
+        // Hide results area
+        document.getElementById("resultSection").style.display = "none";
+      }
+
+      // Predict triage
+      async function predictTriage() {
+        // Validate input
+        if (!validateInputs()) {
+          return;
+        }
+
+        // Show loading state
+        const selectedModel = document.getElementById("modelSelect").value;
+        const loadingText = document.getElementById("loadingText");
+
+        if (selectedModel === "tfidf_rf") {
+          loadingText.textContent =
+            "Machine learning model is analyzing patient information, please wait...";
+        } else {
+          loadingText.textContent =
+            "AI is analyzing patient information, please wait...";
+        }
+
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("resultSection").style.display = "none";
+
+        try {
+          // Collect form data
+          const selectedModel = document.getElementById("modelSelect").value;
+          // Process arrival time
+          let arrivalTime = document.getElementById("arrivalTime").value;
+          if (arrivalTime) {
+            // Convert HH:MM format to complete datetime format
+            const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+            arrivalTime = `${today} ${arrivalTime}:00`; // YYYY-MM-DD HH:MM:SS
+          }
+
+          const patientData = {
+            chief_complaint: document.getElementById("chiefComplaint").value,
+            age: parseInt(document.getElementById("age").value),
+            gender: document.getElementById("gender").value,
+            arrival_transport:
+              document.getElementById("arrivalTransport").value,
+            arrival_time: arrivalTime, // Add arrival time
+            heart_rate: parseInt(document.getElementById("heartRate").value),
+            sbp: parseInt(document.getElementById("sbp").value),
+            dbp: parseInt(document.getElementById("dbp").value),
+            temperature: parseFloat(
+              document.getElementById("temperature").value
+            ),
+            o2sat: parseInt(document.getElementById("o2sat").value),
+            pain: parseInt(document.getElementById("pain").value),
+            model: selectedModel,
+          };
+
+          // Send prediction request
+          const response = await fetch("/api/predict", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(patientData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            displayResults(result);
+          } else {
+            showError(result.error || "Prediction failed");
+          }
+        } catch (error) {
+          showError("Network error: " + error.message);
+        } finally {
+          document.getElementById("loading").style.display = "none";
+        }
+      }
+
+      // Validate input
+      function validateInputs() {
+        const requiredFields = [
+          "chiefComplaint",
+          "age",
+          "heartRate",
+          "sbp",
+          "dbp",
+          "temperature",
+          "o2sat",
+          "pain",
+        ];
+
+        for (const fieldId of requiredFields) {
+          const field = document.getElementById(fieldId);
+          if (!field.value.trim()) {
+            alert(`Please fill in the ${field.placeholder || fieldId} field`);
+            field.focus();
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      // Display results
+      function displayResults(result) {
+        const prediction = result.prediction;
+
+        // Display triage level
+        const triageResult = document.getElementById("triageResult");
+        const levelClass = `triage-level-${prediction.triage_level}`;
+        const levelText = getTriageLevelText(prediction.triage_level);
+
+        triageResult.innerHTML = `
+                <div class="triage-level ${levelClass}">
+                    <h2>${prediction.triage_level}</h2>
+                    <p>${levelText}</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>Confidence</h6>
+                        <p class="mb-0">${(prediction.confidence * 100).toFixed(
+                          1
+                        )}%</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Response Time</h6>
+                        <p class="mb-0">${prediction.response_time} seconds</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Model Used</h6>
+                        <span class="badge ${
+                          prediction.model === "llama_rag"
+                            ? "bg-primary"
+                            : "bg-secondary"
+                        }">
+                            ${
+                              prediction.model === "llama_rag"
+                                ? "Llama-3.3-70B + RAG"
+                                : "TFIDF-ML"
+                            }
+                        </span>
+                    </div>
+                </div>
+            `;
+
+        // Display analysis details
+        const analysisDetailsSection = document.getElementById(
+          "analysisDetailsSection"
+        );
+        const analysisDetails = document.getElementById("analysisDetails");
+
+        if (prediction.model === "llama_rag" && prediction.reasoning) {
+          analysisDetailsSection.style.display = "block";
+
+          analysisDetails.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h6>AI Analysis & Reasoning</h6>
+                        <p>${prediction.reasoning}</p>
+                        <small class="text-muted">Prediction Time: ${result.timestamp}</small>
+                    </div>
+                </div>
+            `;
+        } else {
+          // For TFIDF-ML, hide the entire analysis details section
+          analysisDetailsSection.style.display = "none";
+        }
+
+        // Update model description - only show for llama_rag
+        const modelNote = document.getElementById("modelNote");
+        if (prediction.model === "llama_rag") {
+          modelNote.textContent =
+            "Llama+RAG: Real patient cases retrieved from database using advanced AI";
+        } else {
+          modelNote.textContent = "";
+        }
+
+        // Display similar cases
+        const similarCasesSection = document.getElementById(
+          "similarCasesSection"
+        );
+        const similarCases = document.getElementById("similarCases");
+
+        if (prediction.model === "llama_rag") {
+          similarCasesSection.style.display = "block";
+          if (prediction.similar_cases && prediction.similar_cases.length > 0) {
+            let casesHtml = '<div class="similar-cases">';
+            prediction.similar_cases.forEach((case_item) => {
+              // Debug: 在控制台打印vitals信息
+              console.log("Case vitals:", case_item.vitals);
+
+              casesHtml += `
+                          <div class="case-item">
+                              <strong>Chief Complaint:</strong> ${
+                                case_item.chief_complaint
+                              }<br>
+                              <strong>Triage Level:</strong> ${
+                                case_item.triage_level
+                              }<br>
+                              ${
+                                case_item.vitals && case_item.vitals !== "N/A"
+                                  ? `<strong>Patient Info:</strong> ${case_item.vitals}<br>`
+                                  : ""
+                              }
+                              <strong>Similarity:</strong> ${case_item.outcome}
+                          </div>
+                      `;
+            });
+            casesHtml += "</div>";
+            similarCases.innerHTML = casesHtml;
+          } else {
+            similarCases.innerHTML =
+              '<p class="text-muted">No similar cases found</p>';
+          }
+        } else {
+          // For TFIDF-ML, hide the entire similar cases section
+          similarCasesSection.style.display = "none";
+        }
+
+        // Show results area
+        document.getElementById("resultSection").style.display = "block";
+      }
+
+      // Get triage level text
+      function getTriageLevelText(level) {
+        const levels = {
+          1: "Critical - Requires immediate medical intervention",
+          2: "Severe - Requires timely medical evaluation",
+          3: "Moderate - Requires medical evaluation but not urgent",
+          4: "Minor - Can wait for routine medical evaluation",
+        };
+        return levels[level] || "Unknown level";
+      }
+
+      // Show error
+      function showError(message) {
+        alert("Error: " + message);
+      }
+    </script>
+  </body>
+</html>
