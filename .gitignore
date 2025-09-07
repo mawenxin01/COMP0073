@@ -9,6 +9,12 @@
 # Git backup directory
 .git_backup/
 
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
 # Virtual environments
 venv/
 .venv/

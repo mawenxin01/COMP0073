@@ -1,0 +1,29 @@
+# 环境变量配置示例
+# 复制此文件为 .env 并填入实际值
+
+# 基础配置
+ENVIRONMENT=development
+DEBUG=true
+LOG_LEVEL=INFO
+
+# API 配置
+API_HOST=localhost
+API_PORT=8000
+
+# 数据库配置
+DATABASE_URL=sqlite:///./medical_triage.db
+
+# OpenAI 配置
+OPENAI_API_KEY=your-openai-api-key-here
+
+# WatsonX 配置
+WATSONX_API_KEY=your-watsonx-api-key-here
+WATSONX_ENDPOINT=https://your-watsonx-endpoint.com
+
+# 安全配置
+SECRET_KEY=your-secret-key-here
+API_RATE_LIMIT=100
+
+# 缓存配置
+CACHE_ENABLED=true
+CACHE_TTL=3600 
